@@ -156,9 +156,9 @@ void BinanceClient::onMessage(const std::string& message) {
 
 void BinanceClient::printDepthResult(const std::string& fullMessage, const std::string& resultObj) {
     std::smatch m;
-    std::regex idStrRegex(R"("id"\s*:\s*"([^"]+)")");
-    std::regex idNumRegex(R"("id"\s*:\s*(\d+))");
-    std::regex statusRegex(R"("status"\s*:\s*(\d+))");
+    std::regex idStrRegex(R"REGEX("id"\s*:\s*"([^"]+)")REGEX");
+    std::regex idNumRegex(R"REGEX("id"\s*:\s*(\d+))REGEX");
+    std::regex statusRegex(R"REGEX("status"\s*:\s*(\d+))REGEX");
     std::string idVal;
     if (std::regex_search(fullMessage, m, idStrRegex)) {
         idVal = m[1].str();
@@ -173,20 +173,20 @@ void BinanceClient::printDepthResult(const std::string& fullMessage, const std::
     long long lastUpdateId = 0;
     long long eVal = 0;
     long long tVal = 0;
-    std::regex lastUpdateIdRegex(R"("lastUpdateId"\s*:\s*(\d+))");
-    std::regex eRegex(R"("E"\s*:\s*(\d+))");
-    std::regex tRegex(R"("T"\s*:\s*(\d+))");
+    std::regex lastUpdateIdRegex(R"REGEX("lastUpdateId"\s*:\s*(\d+))REGEX");
+    std::regex eRegex(R"REGEX("E"\s*:\s*(\d+))REGEX");
+    std::regex tRegex(R"REGEX("T"\s*:\s*(\d+))REGEX");
     if (std::regex_search(resultObj, match, lastUpdateIdRegex)) lastUpdateId = std::stoll(match[1].str());
     if (std::regex_search(resultObj, match, eRegex)) eVal = std::stoll(match[1].str());
     if (std::regex_search(resultObj, match, tRegex)) tVal = std::stoll(match[1].str());
     std::smatch mlist;
     std::string bidsList;
     std::string asksList;
-    std::regex listRegexBids(R"("bids"\s*:\s*\[(.*)\])");
-    std::regex listRegexAsks(R"("asks"\s*:\s*\[(.*)\])");
+    std::regex listRegexBids(R"REGEX("bids"\s*:\s*\[(.*)\])REGEX");
+    std::regex listRegexAsks(R"REGEX("asks"\s*:\s*\[(.*)\])REGEX");
     if (std::regex_search(resultObj, mlist, listRegexBids)) bidsList = mlist[1].str();
     if (std::regex_search(resultObj, mlist, listRegexAsks)) asksList = mlist[1].str();
-    std::regex pairRegex(R"(\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\])");
+    std::regex pairRegex(R"REGEX(\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\])REGEX");
     std::vector<std::pair<std::string,std::string>> bidPairs;
     std::vector<std::pair<std::string,std::string>> askPairs;
     if (!bidsList.empty()) {
@@ -243,27 +243,27 @@ void BinanceClient::handleOrderBookUpdate(const std::string& jsonData) {
         orderBook.receiveTime = std::chrono::system_clock::now();
         orderBook.symbol = config_.symbol;
         
-        std::regex lastUpdateIdRegex(R"("lastUpdateId":(\d+))");
+        std::regex lastUpdateIdRegex(R"REGEX("lastUpdateId":(\d+))REGEX");
         std::smatch match;
         if (std::regex_search(jsonData, match, lastUpdateIdRegex)) {
             orderBook.lastUpdateId = std::stoll(match[1].str());
         }
         
-        std::regex eRegex(R"("E":(\d+))");
+        std::regex eRegex(R"REGEX("E":(\d+))REGEX");
         if (std::regex_search(jsonData, match, eRegex)) {
             orderBook.messageTime = std::stoll(match[1].str());
         }
         
-        std::regex tRegex(R"("T":(\d+))");
+        std::regex tRegex(R"REGEX("T":(\d+))REGEX");
         if (std::regex_search(jsonData, match, tRegex)) {
             orderBook.transactionTime = std::stoll(match[1].str());
         }
         
         std::smatch mlist;
-        std::regex listRegexBids(R"("bids"\s*:\s*\[(.*)\])");
-        std::regex listRegexAsks(R"("asks"\s*:\s*\[(.*)\])");
-        std::regex listRegexB(R"("b"\s*:\s*\[(.*)\])");
-        std::regex listRegexA(R"("a"\s*:\s*\[(.*)\])");
+        std::regex listRegexBids(R"REGEX("bids"\s*:\s*\[(.*)\])REGEX");
+        std::regex listRegexAsks(R"REGEX("asks"\s*:\s*\[(.*)\])REGEX");
+        std::regex listRegexB(R"REGEX("b"\s*:\s*\[(.*)\])REGEX");
+        std::regex listRegexA(R"REGEX("a"\s*:\s*\[(.*)\])REGEX");
         std::string bidsList;
         std::string asksList;
         if (std::regex_search(jsonData, mlist, listRegexBids)) bidsList = mlist[1].str();
@@ -296,7 +296,7 @@ void BinanceClient::handleOrderBookUpdate(const std::string& jsonData) {
 
 void BinanceClient::applyPairs(const std::string& src, bool isBid) {
     if (src.empty()) return;
-    std::regex pairRegex(R"(\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\])");
+    std::regex pairRegex(R"REGEX(\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\])REGEX");
     auto begin = std::sregex_iterator(src.begin(), src.end(), pairRegex);
     auto end = std::sregex_iterator();
     for (auto it = begin; it != end; ++it) {
