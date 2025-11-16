@@ -20,6 +20,18 @@ BinanceClient::BinanceClient(const WebSocketConfig& config)
     wsManager_->setErrorCallback([this](const std::string& error) {
         this->onError(error);
     });
+
+    wsManager_->setConnectionCallback([this](bool ok) {
+        if (!ok) return;
+        try {
+            std::string uri = config_.uri;
+            if (uri.find("/ws-fapi/") != std::string::npos || uri.find("/ws-api/") != std::string::npos) {
+                this->requestDepthOnce(config_.symbol, config_.limit);
+            } else {
+                this->subscribeOrderBook(config_.symbol, config_.limit);
+            }
+        } catch (...) {}
+    });
 }
 
 BinanceClient::~BinanceClient() = default;
@@ -89,8 +101,7 @@ void BinanceClient::requestDepthOnce(const std::string& symbol, int limit) {
     std::string up = symbol;
     for (auto &c : up) c = (char)std::toupper(c);
     std::ostringstream req;
-    int lim = (limit == 5 || limit == 10 || limit == 20 || limit == 50 || limit == 100 || limit == 500 || limit == 1000) ? limit : 100;
-    req << "{\"id\":\"" << uuid << "\",\"method\":\"v1/depth\",\"params\":{\"symbol\":\"" << up << "\",\"limit\":" << lim << ",\"returnRateLimits\":true}}";
+    req << "{\"id\":\"" << uuid << "\",\"method\":\"depth\",\"params\":{\"symbol\":\"" << up << "\"}}";
     std::string payload = req.str();
     std::cout << "Sending request: " << payload << std::endl;
     wsManager_->send(payload);

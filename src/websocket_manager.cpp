@@ -161,6 +161,8 @@ void WebSocketManager::send(const std::string& message) {
         if (errorCallback_) {
             errorCallback_(error);
         }
+    } else {
+        std::cout << "Sent frame: " << message << std::endl;
     }
 }
 
