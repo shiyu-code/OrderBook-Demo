@@ -86,8 +86,11 @@ void BinanceClient::requestDepthOnce(const std::string& symbol, int limit) {
     }
     auto genHex = [](){ std::stringstream s; s<<std::hex<<std::setw(8)<<std::setfill('0')<< (uint32_t)std::rand(); return s.str(); };
     std::string uuid = genHex()+"-"+genHex()+"-"+genHex()+"-"+genHex()+"-"+genHex()+genHex();
+    std::string up = symbol;
+    for (auto &c : up) c = (char)std::toupper(c);
     std::ostringstream req;
-    req << "{\"id\":\"" << uuid << "\",\"method\":\"depth\",\"params\":{\"symbol\":\"" << symbol << "\"}}";
+    int lim = (limit == 5 || limit == 10 || limit == 20 || limit == 50 || limit == 100 || limit == 500 || limit == 1000) ? limit : 100;
+    req << "{\"id\":\"" << uuid << "\",\"method\":\"v1/depth\",\"params\":{\"symbol\":\"" << up << "\",\"limit\":" << lim << ",\"returnRateLimits\":true}}";
     std::string payload = req.str();
     std::cout << "Sending request: " << payload << std::endl;
     wsManager_->send(payload);
