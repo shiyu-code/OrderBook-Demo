@@ -50,7 +50,7 @@ void BinanceClient::disconnect() {
 }
 
 bool BinanceClient::isConnected() const {
-    return wsManager_->isConnected() && connected_;
+    return wsManager_->isConnected();
 }
 
 void BinanceClient::subscribeOrderBook(const std::string& symbol, int limit) {
